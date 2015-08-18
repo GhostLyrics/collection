@@ -54,6 +54,8 @@ def create_logger(options):
 
     if options.verbose or options.dry_run:
         stdout_handler.setLevel(logging.INFO)
+    else:
+        stdout_handler.setLevel(logging.WARNING)
 
     logger.addHandler(stdout_handler)
 
