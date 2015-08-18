@@ -11,6 +11,8 @@ Allows to perform a --dry-run.
 """
 
 import argparse
+import logging
+import logging.handlers
 import os.path
 import subprocess
 import sys
@@ -19,23 +21,54 @@ def main():
     """Archive and remove a user's home directory."""
 
     options = parse_arguments()
+    log = create_logger(options)
 
-    archive_output = archive_home(options)
-    check_for_SSH_keys(archive_output, options)
-    trash_home(options)
+    archive_output = archive_home(options, log)
+    check_for_SSH_keys(archive_output, options, log)
+    trash_home(options, log)
 
-    print "Done."
+def create_logger(options):
+    """Set up global logging."""
+
+    # syslog section
+
+    if sys.platform == "darwin":
+        address = "/var/run/syslog"
+
+    elif sys.platform == "linux2":
+        address = "/dev/log"
+
+    logger = logging.getLogger('Logger')
+    facility = logging.handlers.SysLogHandler.LOG_USER
+    handler = logging.handlers.SysLogHandler(address, facility)
+    log_format = logging.Formatter('archive-home: %(message)s')
+    handler.setFormatter(log_format)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+    # stdout section
+
+    formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    stdout_handler = logging.StreamHandler(stream=sys.stdout)
+    stdout_handler.setFormatter(formatter)
+
+    if options.verbose or options.dry_run:
+        stdout_handler.setLevel(logging.INFO)
+
+    logger.addHandler(stdout_handler)
+
+    return logger
 
 
-def check_for_SSH_keys(archive_output, options):
+def check_for_SSH_keys(archive_output, options, log):
     """Notify if authorized SSH key files have been archived."""
 
     if options.dry_run == True:
-        print "SSH Keys would be checked here."
+        log.info("SSH Keys would be checked here.")
 
     else:
         if "authorized_keys" in archive_output:
-            print "SSH keys archived."
+            log.warn("SSH keys archived.")
 
 
 def parse_arguments():
@@ -43,18 +76,21 @@ def parse_arguments():
 
     text_username = "the user whose home directory should be archived"
     text_dry_run = "run in simulated mode and only print actions"
+    text_verbose = "display messages about program flow"
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument("user", help=text_username)
     parser.add_argument("-d", "--dry-run", help=text_dry_run,
                         action="store_true")
+    parser.add_argument("-v", "--verbose", help=text_verbose,
+                        action="store_true")
 
     arguments = parser.parse_args()
     return arguments
 
 
-def archive_home(options):
+def archive_home(options, log):
     """Archive the specified user's home directory."""
 
     home = os.path.expanduser("~{}".format(options.user))
@@ -62,20 +98,24 @@ def archive_home(options):
 
     try:
         if options.dry_run == True:
-            print "Command to execute:",
-            print tar_command
+            log.info("Command to execute: {}".format(tar_command))
 
         else:
+            log.info("Starting archival of home for user {}.".format(
+                options.user))
             output = subprocess.check_output(tar_command,
                                              stderr=subprocess.STDOUT)
             return output
 
     except subprocess.CalledProcessError, error:
-        print error
-        sys.exit("Could not complete archival process.")
+
+        error_message = "Could not complete archival process."
+
+        log.error("{} Error was: {}".format(error_message, error))
+        sys.exit("{} Error was: {}".format(error_message, error))
 
 
-def trash_home(options):
+def trash_home(options, log):
     """Move the specified user's home directory into the trash."""
 
     if sys.platform == "darwin":
@@ -89,11 +129,15 @@ def trash_home(options):
     trash_command = [trash_alias, home]
 
     if options.dry_run == True:
-        print "Command to execute:",
-        print trash_command
+        log.info("Command to execute: {}".format(trash_command))
 
     else:
-        subprocess.check_output(trash_command)
+        try:
+            subprocess.check_output(trash_command)
+            log.info("Moved home of {} to trash.".format(options.user))
+        except Exception:
+            log.error("Moving home of {} to trash failed.".format(options.user))
+            sys.exit("Aborted.")
 
 
 if __name__ == "__main__":
