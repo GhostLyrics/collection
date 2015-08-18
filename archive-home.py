@@ -6,7 +6,8 @@
 """
 Archive and remove a user's home directory.
 
-Notify if SSH keys are archived.
+Home directories are moved to trash instead of deleted immediately.
+If SSH keys are archived the user is notified.
 Allows to perform a --dry-run.
 """
 
