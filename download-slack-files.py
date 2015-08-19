@@ -6,6 +6,7 @@
 """Download all files linked in a Slack export archive."""
 
 import argparse
+from functools import partial
 import json
 import os.path
 from multiprocessing import Pool
@@ -28,7 +29,7 @@ def find_directories(root_directory):
     else:
         sys.exit("Error: {} is not a valid directory".format(root_directory))
 
-def find_URLs(directory):
+def find_URLs(directory, options):
     """Find URLs in JSON files."""
 
     files = os.listdir(directory)
@@ -46,13 +47,17 @@ def find_URLs(directory):
             for message in payload:
                 if ("subtype" in message
                     and message.get("subtype") == "file_share"):
-                    download_filename = message.get("file").get("name")
+
                     download_URL = message.get("file").get("url_download")
 
-                    if download_filename.startswith("-."):
-                        download_filename = download_filename.lstrip("-")
-                        download_filename = "{}{}".format(
-                            message.get("file").get("id"), download_filename)
+                    if options.remote_name:
+                        download_filename = message.get("file").get("id")
+                    else:
+                        download_filename = message.get("file").get("name")
+                        if download_filename.startswith("-."):
+                            download_filename = download_filename.lstrip("-")
+                            download_filename = "{}{}".format(
+                                message.get("file").get("id"), download_filename)
 
                     files_for_download.append((download_filename, download_URL))
 
@@ -92,7 +97,10 @@ def main():
 
     directories = find_directories(options.folder)
     process_pool = Pool(len(directories))
-    process_pool.map(find_URLs, directories)
+
+    function_call = partial(find_URLs, options=options)
+
+    process_pool.map(function_call, directories)
 
 if __name__ == "__main__":
     main()
