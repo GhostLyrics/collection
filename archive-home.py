@@ -9,6 +9,10 @@ Archive and remove a user's home directory.
 Home directories are moved to trash instead of deleted immediately.
 If SSH keys are archived the user is notified.
 Allows to perform a --dry-run.
+
+Depends on trash-cli/trash:
+Linux: https://github.com/andreafrancia/trash-cli
+OS X: http://hasseg.org/trash/
 """
 
 import argparse
