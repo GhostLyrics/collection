@@ -3,7 +3,13 @@
 # Allow CAPS in function names
 # pylint: disable=C0103
 
-"""Download all files linked in a Slack export archive."""
+"""
+Download all files linked in a Slack export archive.
+
+All uploaded files are downloaded into their respective channel folders.
+Optionally, Slack IDs can be used instead of file names.
+
+"""
 
 import argparse
 from functools import partial
