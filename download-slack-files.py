@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# Allow CAPS in function names
+# pylint: disable=C0103
+
 """Download all files linked in a Slack export archive."""
 
 import json
