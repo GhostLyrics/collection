@@ -5,6 +5,7 @@
 
 """Download all files linked in a Slack export archive."""
 
+import argparse
 import json
 import os.path
 from multiprocessing import Pool
@@ -69,17 +70,29 @@ def download_URLs(files_for_download, directory):
         with open(path, "wb") as downloaded_file:
             downloaded_file.write(content)
 
+def parse_arguments():
+    """Parse given command line arguments."""
+
+    text_folder = "the unzipped Slack export directory"
+    text_remote_name = "keep Slack file IDs instead of using the file names"
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("folder", help=text_folder)
+    parser.add_argument("--remote-name", help=text_remote_name,
+        action="store_true")
+
+    arguments = parser.parse_args()
+    return arguments
+
 def main():
     """Download all files linked in a Slack export archive."""
 
-    if len(sys.argv) != 2:
-        sys.exit("USAGE: slackdownload.py SLACK_EXPORT_DIRECTORY")
+    options = parse_arguments()
 
-    else:
-        root = sys.argv[1]
-        directories = find_directories(root)
-        process_pool = Pool(len(directories))
-        process_pool.map(find_URLs, directories)
+    directories = find_directories(options.folder)
+    process_pool = Pool(len(directories))
+    process_pool.map(find_URLs, directories)
 
 if __name__ == "__main__":
     main()
