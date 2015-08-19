@@ -63,7 +63,8 @@ def find_URLs(directory, options):
                         if download_filename.startswith("-."):
                             download_filename = download_filename.lstrip("-")
                             download_filename = "{}{}".format(
-                                message.get("file").get("id"), download_filename)
+                                message.get("file").get("id"),
+                                download_filename)
 
                     files_for_download.append((download_filename, download_URL))
 
