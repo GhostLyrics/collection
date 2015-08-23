@@ -33,6 +33,14 @@ def main():
         posts = get_content(connection, "posts", options.prefix)
         pages = get_content(connection, "pages", options.prefix)
 
+        if not options.include_categories and not options.include_tags:
+            connection.close()
+
+        if posts:
+            export_content(posts, "posts", authors, options, connection)
+        if pages:
+            export_content(pages, "pages", authors, options, connection)
+
     except mdb.Error, error:
         sys.exit("Error: {}".format(error))
 
@@ -40,33 +48,82 @@ def main():
         if connection:
             connection.close()
 
-    if posts:
-        export_content(posts, "posts", authors, options)
-    if pages:
-        export_content(pages, "pages", authors, options)
-
-def export_content(content, content_type, authors, options):
+def export_content(content, content_type, authors, options, connection=None):
     """Write the exported content to files."""
 
     if os.path.exists("./{}".format(content_type)) is False:
         os.mkdir(content_type)
 
+    exported_authors = None
+    exported_tags = None
+    exported_categories = None
+
     for entry in content:
 
-        export = build_export(entry, authors, options, options.include_tags,
-            options.include_categories)
+        if options.include_author:
+            exported_authors = authors
+
+        if (options.include_categories or options.include_tags) and connection:
+            labels = get_labels(entry, options.prefix, connection)
+
+            if options.include_categories:
+                exported_categories = labels.get("category")
+            if options.include_tags:
+                exported_tags = labels.get("post_tag")
+
+        export = build_export(entry, options, exported_authors, exported_tags,
+            exported_categories)
 
         with open(os.path.join(content_type, entry["post_name"])
                   + ".txt", "w") as textfile:
             textfile.write(export)
 
+def get_labels(entry, prefix, connection):
 
-def build_export(entry, authors, options, tags=None, categories=None):
+    labels = {}
+
+    statement = ("SELECT term_taxonomy_id FROM {}_term_relationships "
+                 "WHERE object_id = {}".format(prefix, entry["ID"]))
+
+    cursor = connection.cursor(mdb.cursors.DictCursor)
+
+
+    cursor.execute(statement)
+    unresolved_labels = cursor.fetchall()
+
+    for label in unresolved_labels:
+
+        statement = ("SELECT name from {}_terms where term_id "
+                     "= {}".format(prefix, label.get("term_taxonomy_id")))
+        cursor.execute(statement)
+        result = cursor.fetchall()
+        try:
+            label_name = result[0].get("name")
+
+        # there is a empty, reserved next label available, so expect to
+        # read on an invalid error once.
+        except IndexError:
+            continue
+
+
+        statement = ("SELECT taxonomy FROM {}_term_taxonomy WHERE "
+                     "term_id = {}".format(prefix, label.get("term_taxonomy_id")))
+        cursor.execute(statement)
+        result = cursor.fetchall()
+        label_type = result[0].get("taxonomy")
+
+        if not labels.get(label_type):
+            labels.update({label_type: [label_name]})
+        else:
+            labels.get(label_type).append(label_name)
+
+    return labels
+
+def build_export(entry, options, authors=None, tags=None, categories=None):
     """Construct the export text which is written to the file."""
 
     export = "Title: {}\n".format(entry["post_title"])
     export = export + "Date: {}\n".format(entry["post_date"])
-    export = export + "Author: {}\n".format(authors[entry["post_author"]])
 
     if tags:
         tags_string = ""
@@ -80,12 +137,20 @@ def build_export(entry, authors, options, tags=None, categories=None):
             category_string = category_string + category + ","
         export = export + "Categories: {}\n".format(category_string)
 
+    if authors:
+        export = export + "Author: {}\n".format(authors[entry["post_author"]])
+
     if options.include_modified_date:
         export = export + "Last Modified: {}\n".format(entry["post_modified"])
     if options.include_published_url:
         export = export + "Permalink: {}\n".format(entry["guid"])
 
-    export = export + "\n + {}\n".format(entry["post_content_filtered"])
+
+    # special casing for historical posts (e.g. imported from tumblr)
+    if entry["post_content_filtered"] == "":
+        export = export + "\n{}\n".format(entry["post_content"])
+    else:
+        export = export + "\n{}\n".format(entry["post_content_filtered"])
 
     return export
 
@@ -141,6 +206,7 @@ def parse_arguments():
     text_URL = "Include the published permalink in the metadata block."
     text_tags = "Include tags for posts and pages."
     text_categories = "Include categories for posts and pages."
+    text_author = "Include post or page author."
 
     parser = argparse.ArgumentParser()
 
@@ -154,9 +220,11 @@ def parse_arguments():
         action='store_true')
     parser.add_argument("--include-modified-date", help=text_modified,
         action='store_true')
-    parser.add_argument("-c", "--include-categories", help=text_categories,
+    parser.add_argument("--include-categories", help=text_categories,
         action='store_true')
-    parser.add_argument("-t", "--include-tags", help=text_tags,
+    parser.add_argument("--include-tags", help=text_tags,
+        action='store_true')
+    parser.add_argument("--include-author", help=text_author,
         action='store_true')
 
     arguments = parser.parse_args()
