@@ -29,7 +29,6 @@ def main():
 
     try:
         connection = connect(options)
-        print connection
         authors = get_authors(connection, options.prefix)
         posts = get_content(connection, "posts", options.prefix)
         pages = get_content(connection, "pages", options.prefix)
@@ -45,8 +44,6 @@ def main():
         export_content(posts, "posts", authors, options)
     if pages:
         export_content(pages, "pages", authors, options)
-
-    exit()
 
 def export_content(content, content_type, authors, options):
     """Write the exported content to files."""
@@ -182,7 +179,6 @@ def connect(options):
     password = ask_password(options)
     connection = mdb.connect(options.server, options.user, password,
         options.database)
-    print connection
 
     return connection
 
