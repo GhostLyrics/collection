@@ -33,9 +33,6 @@ def main():
         posts = get_content(connection, "posts", options.prefix)
         pages = get_content(connection, "pages", options.prefix)
 
-        if not options.include_categories and not options.include_tags:
-            connection.close()
-
         if posts:
             export_content(posts, "posts", authors, options, connection)
         if pages:
