@@ -136,10 +136,10 @@ def build_export(entry, options, authors=None, tags=None, categories=None):
         export = export + "Categories: {}\n".format(category_string)
 
     if authors:
-        export = export + "Author: {}\n".format(authors[entry["post_author"]])
+        export = export + "Authors: {}\n".format(authors[entry["post_author"]])
 
     if options.include_modified_date:
-        export = export + "Last Modified: {}\n".format(entry["post_modified"])
+        export = export + "Modified: {}\n".format(entry["post_modified"])
     if options.include_published_url:
         export = export + "Permalink: {}\n".format(entry["guid"])
 
