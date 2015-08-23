@@ -76,6 +76,7 @@ def export_content(content, content_type, authors, options, connection=None):
             textfile.write(export)
 
 def get_labels(entry, prefix, connection):
+    """Fetch tags and categories from the database."""
 
     labels = {}
 
@@ -103,8 +104,8 @@ def get_labels(entry, prefix, connection):
             continue
 
 
-        statement = ("SELECT taxonomy FROM {}_term_taxonomy WHERE "
-                     "term_id = {}".format(prefix, label.get("term_taxonomy_id")))
+        statement = ("SELECT taxonomy FROM {}_term_taxonomy WHERE term_id "
+                     "= {}".format(prefix, label.get("term_taxonomy_id")))
         cursor.execute(statement)
         result = cursor.fetchall()
         label_type = result[0].get("taxonomy")
