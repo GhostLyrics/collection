@@ -72,7 +72,7 @@ def export_content(content, content_type, authors, options, connection=None):
             exported_categories)
 
         with open(os.path.join(content_type, entry["post_name"])
-                  + ".txt", "w") as textfile:
+                  + ".md", "w") as textfile:
             textfile.write(export)
 
 def get_labels(entry, prefix, connection):
