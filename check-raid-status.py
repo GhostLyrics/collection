@@ -8,63 +8,56 @@ Shows progress while rebuilding.
 
 """
 
-import socket
-import subprocess
+import argparse
 import logging
 import logging.handlers
+import socket
+import subprocess
+import sys
 
+def parse_arguments():
+    """Parse given command line arguments."""
 
-def get_configuration():
-    """Return map containing commands to run and parser information."""
+    text_type = "type of RAID controller (supported: MegaRAID or 3ware)"
+    text_controller = "number of RAID controller"
 
-    # structure:
-    # hostname: list(tuple(list(command, arguments), parser), ...)
-    # this allows for multiple RAIDs per host
+    parser = argparse.ArgumentParser()
 
-    command_map = {
-        "dummy1":     [(["/usr/3ware/tw_cli", "info", "c4"], "3ware")],
-        "dummy2":     [(["storcli64", "/c0", "show"], "MegaRAID")],
-        "dummy3":     [(["/usr/3Ware/tw_cli", "info", "c0"], "3ware"),
-                       (["/usr/3Ware/tw_cli", "info", "c5"], "3ware")],
-        "dummy4":     [(["storcli64", "/c0", "show"], "MegaRAID")],
-        "dummy5":     [(["/usr/3ware/tw_cli", "show", "c4"], "3ware")],
-        "dummy6":     [(["tw_cli", "show", "c4"], "3ware")],
-        "dummy7":     [(["tw_cli", "show", "c4"], "3ware")],
-        "dummy8":     [(["storcli64", "/c0", "show"], "MegaRAID")]
-        }
+    parser.add_argument("type", help=text_type)
+    parser.add_argument("controller", help=text_controller, nargs='+', type=int)
 
-    return command_map
-
+    arguments = parser.parse_args()
+    return arguments
 
 def main():
     """Check RAID controller for health information."""
 
+    options = parse_arguments()
     log = create_logger()
 
     hostname = socket.gethostname()
     log.info("Running RAID check on %s", hostname)
 
-    try:
-        configuration = get_configuration().get(hostname)
-    except KeyError:
-        log.error("RAID check not configured for %s", hostname)
+    for controller in options.controller:
+        command = build_command(options.type, controller, log)
 
-    for instruction in configuration:
-        command_result = subprocess.check_output(instruction[0])
-        message = "No issues detected."
+        try:
+            command_result = subprocess.check_output(command,
+                                                     stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError, error:
+            log_and_quit("Checking controller failed.", log, error)
+
+        message = "All is well and all shall be well."
 
         lines = command_result.split("\n")
 
         for line in lines:
             if not line == '':
-                if instruction[1] == "3ware":
 
-                    controller = instruction[0][2][1]
+                if options.type == "3ware":
                     result = handle_3ware(line, log, controller)
 
-                elif instruction[1] == "MegaRAID":
-
-                    controller = instruction[0][1][2]
+                elif options.type == "MegaRAID":
                     result = handle_megaraid(line, log, controller)
 
                 if result is False:
@@ -72,6 +65,27 @@ def main():
 
         log.info("Check completed for controller %s. %s", controller, message)
 
+def build_command(controller_type, controller_number, log):
+    """Build shell command to run according to model and controller number."""
+
+    if controller_type == "MegaRAID":
+        command = ["storcli64", "/c{}".format(controller_number), "show"]
+    elif controller_type == "3ware":
+        command = ["tw_cli", "info", "c{}".format(controller_number)]
+    else:
+        log_and_quit("Controller type unknown.", log)
+
+    return command
+
+def log_and_quit(message, log, error=None):
+    """Write error message to log and quit."""
+
+    if error is not None:
+        log.error("{} Error was: {}".format(message, error))
+        sys.exit("{} Error was: {}".format(message, error))
+    else:
+        log.error("{}".format(message))
+        sys.exit("{}".format(message))
 
 def handle_megaraid(line, log, controller):
     """Start the pipeline for MegaRAID type information."""
@@ -84,6 +98,8 @@ def report_megaraid(line, log, controller):
     """Report findings in MegaRAID pipeline."""
 
     success = True
+    progress = None
+    data_type = None
 
     details = line.split()
     status = details[6]
@@ -99,8 +115,9 @@ def report_megaraid(line, log, controller):
     if status != "Onln" and status != "Optl":
         success = False
 
-    log.info("Controller: {}, {} {}: Status: {}".format(
-        controller, data_type, unit, status))
+    if progress is None:
+        log.info("Controller: {}, {} {}: Status: {}".format(
+            controller, data_type, unit, status))
 
     return success
 
