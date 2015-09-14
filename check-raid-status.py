@@ -46,6 +46,8 @@ def main():
                                                      stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError, error:
             log_and_quit("Checking controller failed.", log, error)
+        except OSError, error:
+            log_and_quit("Vendor binary not found in PATH.", log, error)
 
         message = "All is well and all shall be well."
 
