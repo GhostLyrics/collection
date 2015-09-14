@@ -97,7 +97,7 @@ def handle_megaraid(line, log, controller):
 
 
 def report_megaraid(line, log, controller):
-    """Report findings in MegaRAID pipeline."""
+    """Report findings in MegaRAID pipeline, return BOOL of health check."""
 
     success = True
     progress = None
@@ -136,7 +136,7 @@ def handle_3ware(line, log, controller):
 
 
 def report_3ware(line, log, controller):
-    """Report findings in 3ware pipeline, return with bool of health check."""
+    """Report findings in 3ware pipeline, return BOOL of health check."""
 
     success = True
     progress = None
