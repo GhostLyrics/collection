@@ -112,7 +112,8 @@ def report_megaraid(line, log, controller):
         unit = details[1]
 
     # give warning if something is not perfectly well
-    if status != "Onln" and status != "Optl":
+    # Onln: Online | Optl: Optimal | Rbld: Rebuilding
+    if status not in ["Onln", "Optl", "Rbld"]:
         success = False
 
     if progress is None:
@@ -147,7 +148,7 @@ def report_3ware(line, log, controller):
         status = line.split()[1]
 
     # give warning if something is not perfectly well
-    if status != "OK" and status != "REBUILDING":
+    if status not in ["OK", "REBUILDING"]:
         success = False
 
     if progress is None:
