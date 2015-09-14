@@ -121,6 +121,9 @@ def report_megaraid(line, log, controller):
     if progress is None:
         log.info("Controller: {}, {} {}: Status: {}".format(
             controller, data_type, unit, status))
+    else:
+        # TODO: progress indication
+        pass
 
     return success
 
