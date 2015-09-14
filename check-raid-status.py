@@ -3,8 +3,8 @@
 """
 Check RAID controller for health information, write to syslog.
 
-:copyright: (c) 2014 by Alexander Skiba <alexander.skiba@icg.tugraz.at>
-:license: MIT
+Can work with controllers of type MegaRAID and 3ware.
+Shows progress while rebuilding.
 
 """
 
