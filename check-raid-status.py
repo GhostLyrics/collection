@@ -3,9 +3,11 @@
 """
 Check RAID controller for health information, write to syslog.
 
-Can work with controllers of type MegaRAID and 3ware.
+Works with controllers of type MegaRAID and 3ware.
 Shows progress while rebuilding.
 
+Depends on the vendor specific binaries for MegaRAID (storcli64) and 3ware
+(tw_cli) being installed and in the PATH.
 """
 
 import argparse
