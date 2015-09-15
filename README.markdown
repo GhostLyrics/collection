@@ -27,6 +27,23 @@ optional arguments:
   -v, --verbose  display messages about program flow
 ```
 
+## checkraid-status
+
+Check RAID controller for health information, write to syslog. Works with controllers of type MegaRAID and 3ware. Shows progress while rebuilding.  Allows checking of multiple controllers.
+
+**Depends on the vendor specific binaries for MegaRAID** (`storcli64`) **and 3ware** (`tw_cli`) **being installed and in the PATH.**
+
+```none
+usage: check-raid-status.py [-h] type controller [controller ...]
+
+positional arguments:
+  type        type of RAID controller (supported: MegaRAID or 3ware)
+  controller  number of RAID controller
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
 ## download-slack-files
 
 Download all files linked in a Slack export archive.
