@@ -27,7 +27,7 @@ optional arguments:
   -v, --verbose  display messages about program flow
 ```
 
-## checkraid-status
+## check-raid-status
 
 Check RAID controller for health information, write to syslog. Works with controllers of type MegaRAID and 3ware. Shows progress while rebuilding.  Allows checking of multiple controllers.
 
