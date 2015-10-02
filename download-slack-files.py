@@ -54,7 +54,7 @@ def find_URLs(directory, options):
             payload = json.load(json_file)
             for message in payload:
                 if ("subtype" in message
-                    and message.get("subtype") == "file_share"):
+                        and message.get("subtype") == "file_share"):
 
                     download_URL = message.get("file").get("url_download")
 
@@ -68,7 +68,8 @@ def find_URLs(directory, options):
                                 message.get("file").get("id"),
                                 download_filename)
 
-                    files_for_download.append((download_filename, download_URL))
+                    files_for_download.append(
+                        (download_filename, download_URL))
 
     download_URLs(files_for_download, directory)
 
@@ -96,7 +97,7 @@ def parse_arguments():
 
     parser.add_argument("folder", help=text_folder)
     parser.add_argument("--remote-name", help=text_remote_name,
-        action="store_true")
+                        action="store_true")
 
     arguments = parser.parse_args()
     return arguments
