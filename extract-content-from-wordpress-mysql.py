@@ -90,7 +90,6 @@ def get_labels(entry, prefix, connection):
 
     cursor = connection.cursor(mdb.cursors.DictCursor)
 
-
     cursor.execute(statement)
     unresolved_labels = cursor.fetchall()
 
@@ -107,7 +106,6 @@ def get_labels(entry, prefix, connection):
         # read on an invalid error once.
         except IndexError:
             continue
-
 
         statement = ("SELECT taxonomy FROM {}_term_taxonomy WHERE term_id "
                      "= {}".format(prefix, label.get("term_taxonomy_id")))
@@ -148,7 +146,6 @@ def build_export(entry, options, authors=None, tags=None, categories=None):
         export = export + "Modified: {}\n".format(entry["post_modified"])
     if options.include_published_url:
         export = export + "Permalink: {}\n".format(entry["guid"])
-
 
     # special casing for historical posts (e.g. imported from tumblr)
     if entry["post_content_filtered"] == "":
