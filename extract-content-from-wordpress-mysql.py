@@ -2,6 +2,8 @@
 
 # Allow CAPS in function names
 # pylint: disable=C0103
+# Ignore "missing" members in MySQLdb
+# pylint: disable=E1101
 
 """
 Export posts and pages from Wordpress MySQL database to text files.
