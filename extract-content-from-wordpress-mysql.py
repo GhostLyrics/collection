@@ -73,7 +73,7 @@ def export_content(content, content_type, authors, options, connection=None):
                 exported_tags = labels.get("post_tag")
 
         export = build_export(entry, options, exported_authors, exported_tags,
-            exported_categories)
+                              exported_categories)
 
         with open(os.path.join(content_type, entry["post_name"])
                   + ".md", "w") as textfile:
@@ -178,11 +178,13 @@ def get_content(connection, content_type, prefix):
 
     if content_type == "pages":
         content_statement = ("SELECT * FROM {}_posts WHERE post_type ="
-            " 'page' AND post_status NOT LIKE 'auto-draft'".format(prefix))
+                             " 'page' AND post_status NOT LIKE 'auto-draft'")
+        content_statement.format(prefix)
 
     elif content_type == "posts":
         content_statement = ("SELECT * FROM {}_posts WHERE post_type ="
-            " 'post' AND post_status NOT LIKE 'auto-draft'".format(prefix))
+                             " 'post' AND post_status NOT LIKE 'auto-draft'")
+        content_statement.format(prefix)
 
     else:
         raise TypeError("{} is not a recognized type of content.".format(
@@ -219,15 +221,15 @@ def parse_arguments():
     parser.add_argument("-p", "--prefix", help=text_prefix, default="wp")
 
     parser.add_argument("--include-published-url", help=text_URL,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-modified-date", help=text_modified,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-categories", help=text_categories,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-tags", help=text_tags,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-author", help=text_author,
-        action='store_true')
+                        action='store_true')
 
     arguments = parser.parse_args()
 
@@ -238,7 +240,7 @@ def ask_password(options):
     """Get the password from stdin."""
 
     password_text = "Password for {} on {}: ".format(options.user,
-        options.server)
+                                                     options.server)
 
     password = getpass.getpass(password_text)
 
@@ -250,7 +252,7 @@ def connect(options):
 
     password = ask_password(options)
     connection = mdb.connect(options.server, options.user, password,
-        options.database)
+                             options.database)
 
     return connection
 
