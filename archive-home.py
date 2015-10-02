@@ -144,8 +144,9 @@ def trash_home(options, log):
         try:
             subprocess.check_output(trash_command)
             log.info("Moved home of {} to trash.".format(options.user))
-        except Exception:
-            log.error("Moving home of {} to trash failed.".format(options.user))
+        except subprocess.CalledProcessError:
+            log.error("Moving home of {} to trash failed.".format(
+                options.user))
             sys.exit("Aborted.")
 
 
