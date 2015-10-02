@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 
+
 def parse_arguments():
     """Parse given command line arguments."""
 
@@ -26,10 +27,12 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("type", help=text_type)
-    parser.add_argument("controller", help=text_controller, nargs='+', type=int)
+    parser.add_argument("controller", help=text_controller, nargs='+',
+                        type=int)
 
     arguments = parser.parse_args()
     return arguments
+
 
 def main():
     """Check RAID controller for health information."""
@@ -69,6 +72,7 @@ def main():
 
         log.info("Check completed for controller %s. %s", controller, message)
 
+
 def build_command(controller_type, controller_number, log):
     """Build shell command to run according to model and controller number."""
 
@@ -81,6 +85,7 @@ def build_command(controller_type, controller_number, log):
 
     return command
 
+
 def log_and_quit(message, log, error=None):
     """Write error message to log and quit."""
 
@@ -90,6 +95,7 @@ def log_and_quit(message, log, error=None):
     else:
         log.error("{}".format(message))
         sys.exit("{}".format(message))
+
 
 def handle_megaraid(line, log, controller):
     """Start the pipeline for MegaRAID type information."""
