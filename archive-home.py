@@ -22,6 +22,7 @@ import os.path
 import subprocess
 import sys
 
+
 def main():
     """Archive and remove a user's home directory."""
 
@@ -31,6 +32,7 @@ def main():
     archive_output = archive_home(options, log)
     check_for_SSH_keys(archive_output, options, log)
     trash_home(options, log)
+
 
 def create_logger(options):
     """Set up global logging."""
@@ -70,7 +72,7 @@ def create_logger(options):
 def check_for_SSH_keys(archive_output, options, log):
     """Notify if authorized SSH key files have been archived."""
 
-    if options.dry_run == True:
+    if options.dry_run is True:
         log.info("SSH Keys would be checked here.")
 
     else:
@@ -104,7 +106,7 @@ def archive_home(options, log):
     tar_command = ["tar", "czpvf", "{}.tar.gz".format(options.user), home]
 
     try:
-        if options.dry_run == True:
+        if options.dry_run is True:
             log.info("Command to execute: {}".format(tar_command))
 
         else:
@@ -135,15 +137,16 @@ def trash_home(options, log):
 
     trash_command = [trash_alias, home]
 
-    if options.dry_run == True:
+    if options.dry_run is True:
         log.info("Command to execute: {}".format(trash_command))
 
     else:
         try:
             subprocess.check_output(trash_command)
             log.info("Moved home of {} to trash.".format(options.user))
-        except Exception:
-            log.error("Moving home of {} to trash failed.".format(options.user))
+        except subprocess.CalledProcessError:
+            log.error("Moving home of {} to trash failed.".format(
+                options.user))
             sys.exit("Aborted.")
 
 

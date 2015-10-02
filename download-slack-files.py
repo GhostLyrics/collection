@@ -19,6 +19,7 @@ from multiprocessing import Pool
 import urllib2
 import sys
 
+
 def find_directories(root_directory):
     """Return a list of subdirectories prefixed with the parent directory."""
 
@@ -34,6 +35,7 @@ def find_directories(root_directory):
 
     else:
         sys.exit("Error: {} is not a valid directory".format(root_directory))
+
 
 def find_URLs(directory, options):
     """Find URLs in JSON files."""
@@ -52,7 +54,7 @@ def find_URLs(directory, options):
             payload = json.load(json_file)
             for message in payload:
                 if ("subtype" in message
-                    and message.get("subtype") == "file_share"):
+                        and message.get("subtype") == "file_share"):
 
                     download_URL = message.get("file").get("url_download")
 
@@ -66,9 +68,11 @@ def find_URLs(directory, options):
                                 message.get("file").get("id"),
                                 download_filename)
 
-                    files_for_download.append((download_filename, download_URL))
+                    files_for_download.append(
+                        (download_filename, download_URL))
 
     download_URLs(files_for_download, directory)
+
 
 def download_URLs(files_for_download, directory):
     """Download the files."""
@@ -82,6 +86,7 @@ def download_URLs(files_for_download, directory):
         with open(path, "wb") as downloaded_file:
             downloaded_file.write(content)
 
+
 def parse_arguments():
     """Parse given command line arguments."""
 
@@ -92,10 +97,11 @@ def parse_arguments():
 
     parser.add_argument("folder", help=text_folder)
     parser.add_argument("--remote-name", help=text_remote_name,
-        action="store_true")
+                        action="store_true")
 
     arguments = parser.parse_args()
     return arguments
+
 
 def main():
     """Download all files linked in a Slack export archive."""

@@ -2,6 +2,8 @@
 
 # Allow CAPS in function names
 # pylint: disable=C0103
+# Ignore "missing" members in MySQLdb
+# pylint: disable=E1101
 
 """
 Export posts and pages from Wordpress MySQL database to text files.
@@ -20,6 +22,7 @@ import sys
 
 # non standard modules
 import MySQLdb as mdb
+
 
 def main():
     """Export posts and pages from Wordpress MySQL database to text files."""
@@ -45,6 +48,7 @@ def main():
         if connection:
             connection.close()
 
+
 def export_content(content, content_type, authors, options, connection=None):
     """Write the exported content to files."""
 
@@ -69,11 +73,12 @@ def export_content(content, content_type, authors, options, connection=None):
                 exported_tags = labels.get("post_tag")
 
         export = build_export(entry, options, exported_authors, exported_tags,
-            exported_categories)
+                              exported_categories)
 
         with open(os.path.join(content_type, entry["post_name"])
                   + ".md", "w") as textfile:
             textfile.write(export)
+
 
 def get_labels(entry, prefix, connection):
     """Fetch tags and categories from the database."""
@@ -84,7 +89,6 @@ def get_labels(entry, prefix, connection):
                  "WHERE object_id = {}".format(prefix, entry["ID"]))
 
     cursor = connection.cursor(mdb.cursors.DictCursor)
-
 
     cursor.execute(statement)
     unresolved_labels = cursor.fetchall()
@@ -103,7 +107,6 @@ def get_labels(entry, prefix, connection):
         except IndexError:
             continue
 
-
         statement = ("SELECT taxonomy FROM {}_term_taxonomy WHERE term_id "
                      "= {}".format(prefix, label.get("term_taxonomy_id")))
         cursor.execute(statement)
@@ -116,6 +119,7 @@ def get_labels(entry, prefix, connection):
             labels.get(label_type).append(label_name)
 
     return labels
+
 
 def build_export(entry, options, authors=None, tags=None, categories=None):
     """Construct the export text which is written to the file."""
@@ -143,7 +147,6 @@ def build_export(entry, options, authors=None, tags=None, categories=None):
     if options.include_published_url:
         export = export + "Permalink: {}\n".format(entry["guid"])
 
-
     # special casing for historical posts (e.g. imported from tumblr)
     if entry["post_content_filtered"] == "":
         export = export + "\n{}\n".format(entry["post_content"])
@@ -151,6 +154,7 @@ def build_export(entry, options, authors=None, tags=None, categories=None):
         export = export + "\n{}\n".format(entry["post_content_filtered"])
 
     return export
+
 
 def get_authors(connection, prefix):
     """Get a dictionary of authors from the database."""
@@ -174,11 +178,13 @@ def get_content(connection, content_type, prefix):
 
     if content_type == "pages":
         content_statement = ("SELECT * FROM {}_posts WHERE post_type ="
-            " 'page' AND post_status NOT LIKE 'auto-draft'".format(prefix))
+                             " 'page' AND post_status NOT LIKE 'auto-draft'")
+        content_statement.format(prefix)
 
     elif content_type == "posts":
         content_statement = ("SELECT * FROM {}_posts WHERE post_type ="
-            " 'post' AND post_status NOT LIKE 'auto-draft'".format(prefix))
+                             " 'post' AND post_status NOT LIKE 'auto-draft'")
+        content_statement.format(prefix)
 
     else:
         raise TypeError("{} is not a recognized type of content.".format(
@@ -215,36 +221,38 @@ def parse_arguments():
     parser.add_argument("-p", "--prefix", help=text_prefix, default="wp")
 
     parser.add_argument("--include-published-url", help=text_URL,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-modified-date", help=text_modified,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-categories", help=text_categories,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-tags", help=text_tags,
-        action='store_true')
+                        action='store_true')
     parser.add_argument("--include-author", help=text_author,
-        action='store_true')
+                        action='store_true')
 
     arguments = parser.parse_args()
 
     return arguments
 
+
 def ask_password(options):
     """Get the password from stdin."""
 
     password_text = "Password for {} on {}: ".format(options.user,
-        options.server)
+                                                     options.server)
 
     password = getpass.getpass(password_text)
 
     return password
+
 
 def connect(options):
     """Open a connection to the database."""
 
     password = ask_password(options)
     connection = mdb.connect(options.server, options.user, password,
-        options.database)
+                             options.database)
 
     return connection
 
