@@ -42,6 +42,7 @@ positional arguments:
 
 optional arguments:
   -h, --help  show this help message and exit
+  --cron-mode complain about drive issues to stdout
 ```
 
 ## download-slack-files
