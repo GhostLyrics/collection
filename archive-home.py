@@ -22,6 +22,7 @@ import os.path
 import subprocess
 import sys
 
+
 def main():
     """Archive and remove a user's home directory."""
 
@@ -31,6 +32,7 @@ def main():
     archive_output = archive_home(options, log)
     check_for_SSH_keys(archive_output, options, log)
     trash_home(options, log)
+
 
 def create_logger(options):
     """Set up global logging."""

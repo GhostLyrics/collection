@@ -19,6 +19,7 @@ from multiprocessing import Pool
 import urllib2
 import sys
 
+
 def find_directories(root_directory):
     """Return a list of subdirectories prefixed with the parent directory."""
 
@@ -34,6 +35,7 @@ def find_directories(root_directory):
 
     else:
         sys.exit("Error: {} is not a valid directory".format(root_directory))
+
 
 def find_URLs(directory, options):
     """Find URLs in JSON files."""
@@ -70,6 +72,7 @@ def find_URLs(directory, options):
 
     download_URLs(files_for_download, directory)
 
+
 def download_URLs(files_for_download, directory):
     """Download the files."""
 
@@ -81,6 +84,7 @@ def download_URLs(files_for_download, directory):
 
         with open(path, "wb") as downloaded_file:
             downloaded_file.write(content)
+
 
 def parse_arguments():
     """Parse given command line arguments."""
@@ -96,6 +100,7 @@ def parse_arguments():
 
     arguments = parser.parse_args()
     return arguments
+
 
 def main():
     """Download all files linked in a Slack export archive."""

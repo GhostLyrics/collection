@@ -21,6 +21,7 @@ import sys
 # non standard modules
 import MySQLdb as mdb
 
+
 def main():
     """Export posts and pages from Wordpress MySQL database to text files."""
 
@@ -44,6 +45,7 @@ def main():
     finally:
         if connection:
             connection.close()
+
 
 def export_content(content, content_type, authors, options, connection=None):
     """Write the exported content to files."""
@@ -74,6 +76,7 @@ def export_content(content, content_type, authors, options, connection=None):
         with open(os.path.join(content_type, entry["post_name"])
                   + ".md", "w") as textfile:
             textfile.write(export)
+
 
 def get_labels(entry, prefix, connection):
     """Fetch tags and categories from the database."""
@@ -117,6 +120,7 @@ def get_labels(entry, prefix, connection):
 
     return labels
 
+
 def build_export(entry, options, authors=None, tags=None, categories=None):
     """Construct the export text which is written to the file."""
 
@@ -151,6 +155,7 @@ def build_export(entry, options, authors=None, tags=None, categories=None):
         export = export + "\n{}\n".format(entry["post_content_filtered"])
 
     return export
+
 
 def get_authors(connection, prefix):
     """Get a dictionary of authors from the database."""
@@ -229,6 +234,7 @@ def parse_arguments():
 
     return arguments
 
+
 def ask_password(options):
     """Get the password from stdin."""
 
@@ -238,6 +244,7 @@ def ask_password(options):
     password = getpass.getpass(password_text)
 
     return password
+
 
 def connect(options):
     """Open a connection to the database."""
