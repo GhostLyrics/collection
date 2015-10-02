@@ -155,7 +155,7 @@ def report_3ware(line, log, controller):
         status = line.split()[1]
 
     # give warning if something is not perfectly well
-    if status not in ["OK", "REBUILDING"]:
+    if status not in ["OK", "REBUILDING", "VERIFYING"]:
         success = False
 
     if progress is None:
