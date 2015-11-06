@@ -119,7 +119,7 @@ def archive_list(options, log):
 def remove_list(options, log):
     """Use mailman tools to remove the specified mailing list."""
 
-    command = ["rmlist", options.listname]
+    command = ["rmlist", options.listname, "--archives"]
 
     if options.dry_run is True:
         log.info("Command to execute: {}".format(command))
