@@ -27,6 +27,29 @@ optional arguments:
   -v, --verbose  display messages about program flow
 ```
 
+## archive-mailman
+
+Archive and remove a mailman mailing list.
+
+Lists are deleted with the mailman provided `rmlist` interface.
+Allows to perform a --dry-run.
+
+**Depends on mailman provided `rmlist`.**
+
+```none
+usage: archive-mailman.py [-h] [-d] [-v] [-p PATH] listname
+
+positional arguments:
+  listname              the mailman mailing list to archive and remove
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d, --dry-run         run in simulated mode and only print actions
+  -v, --verbose         display messages about program flow
+  -p PATH, --archives-path PATH
+                        the path to the mailman folder
+```
+
 ## check-raid-status
 
 Check RAID controller for health information, write to syslog. Works with controllers of type MegaRAID and 3ware. Shows progress while rebuilding.  Allows checking of multiple controllers.
