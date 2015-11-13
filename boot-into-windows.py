@@ -19,6 +19,7 @@ def main():
     entries = get_grub_list(options)
     windows = filter_grub_list(entries, options)
     reboot_with(windows, options)
+    reboot(options)
 
 
 def parse_arguments():
@@ -86,6 +87,17 @@ def reboot_with(windows, options):
     """Use the given identifier for next reboot."""
 
     command = ["grub-reboot", windows]
+
+    if options.verbose is True:
+        pretty_print("command", command)
+
+    subprocess.check_call(command)
+
+
+def reboot(options):
+    """Execute reboot command."""
+
+    command = ["reboot", "now"]
 
     if options.verbose is True:
         pretty_print("command", command)
