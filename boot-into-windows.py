@@ -38,7 +38,7 @@ def filter_grub_list(all_entries):
             windows_line = line
 
     if windows_line is not None:
-        identifier = windows_line.split(2, "'")[1]
+        identifier = windows_line.split("'", 2)[1]
 
     return identifier
 
