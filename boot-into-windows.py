@@ -35,14 +35,25 @@ def parse_arguments():
     return arguments
 
 
+def pretty_print(information_type, text, variable=None):
+    """Print nicer verbose text."""
+
+    if variable is None:
+        string = "[{}]: <{}>".format(information_type.upper(), text)
+    else:
+        string = "[{}]: {} has the value: <{}>".format(
+            information_type.upper(), variable, text)
+
+    print string
+
+
 def get_grub_list(options):
     """Get the list of all GRUB menu entries via grep."""
 
     command = ["grep", "--ignore-case", "menuentry '", "/boot/grub/grub.cfg"]
 
     if options.verbose is True:
-        print "Will execute the following command:"
-        print command
+        pretty_print("command", command)
 
     result = subprocess.check_output(command)
 
@@ -60,15 +71,13 @@ def filter_grub_list(all_entries, options):
             windows_line = line
 
             if options.verbose is True:
-                print "Found the following line as Windows boot entry:"
-                print windows_line
+                pretty_print("data", windows_line, "windows_line")
 
     if windows_line is not None:
         identifier = windows_line.split("'", 2)[1]
 
         if options.verbose is True:
-            print "Will use the following identifier to supply to grub-reboot:"
-            print identifier
+            pretty_print("data", identifier, "identifier")
 
     return identifier
 
@@ -79,8 +88,7 @@ def reboot_with(windows, options):
     command = ["grub-reboot", windows]
 
     if options.verbose is True:
-        print "Will execute the following command:"
-        print command
+        pretty_print("command", command)
 
     subprocess.call(command)
 
