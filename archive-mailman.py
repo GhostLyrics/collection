@@ -1,18 +1,12 @@
 #!/usr/bin/env python
 
-# Allow CAPS in function names
-# pylint: disable=C0103
-
 """
-Archive and remove a user's home directory.
+Archive and delete a mailman mailing list.
 
-Home directories are moved to trash instead of deleted immediately.
-If SSH keys are archived the user is notified.
+Lists are deleted with the mailman provided `rmlist` interface.
 Allows to perform a --dry-run.
 
-Depends on trash-cli/trash:
-Linux: https://github.com/andreafrancia/trash-cli
-OS X: http://hasseg.org/trash/
+Depends on mailman's `rmlist`.
 """
 
 import argparse
@@ -24,14 +18,13 @@ import sys
 
 
 def main():
-    """Archive and remove a user's home directory."""
+    """Archive and delete a mailman mailing list."""
 
     options = parse_arguments()
     log = create_logger(options)
 
-    archive_output = archive_home(options, log)
-    check_for_SSH_keys(archive_output, options, log)
-    trash_home(options, log)
+    archive_list(options, log)
+    remove_list(options, log)
 
 
 def create_logger(options):
@@ -48,7 +41,7 @@ def create_logger(options):
     logger = logging.getLogger('Logger')
     facility = logging.handlers.SysLogHandler.LOG_USER
     handler = logging.handlers.SysLogHandler(address, facility)
-    log_format = logging.Formatter('archive-home: %(message)s')
+    log_format = logging.Formatter('archive-mailman: %(message)s')
     handler.setFormatter(log_format)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
@@ -69,49 +62,48 @@ def create_logger(options):
     return logger
 
 
-def check_for_SSH_keys(archive_output, options, log):
-    """Notify if authorized SSH key files have been archived."""
-
-    if options.dry_run is True:
-        log.info("SSH Keys would be checked here.")
-
-    else:
-        if "authorized_keys" in archive_output:
-            log.warn("SSH keys archived.")
-
-
 def parse_arguments():
     """Parse given command line arguments."""
 
-    text_username = "the user whose home directory should be archived"
     text_dry_run = "run in simulated mode and only print actions"
     text_verbose = "display messages about program flow"
+    text_listname = "the mailman mailing list to archive and remove"
+    text_listpath = "the path to the mailman folder"
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("user", help=text_username)
+    parser.add_argument("listname", help=text_listname)
     parser.add_argument("-d", "--dry-run", help=text_dry_run,
                         action="store_true")
     parser.add_argument("-v", "--verbose", help=text_verbose,
                         action="store_true")
+    parser.add_argument("-p", "--archives-path", help=text_listpath,
+                        metavar="PATH")
 
     arguments = parser.parse_args()
     return arguments
 
 
-def archive_home(options, log):
-    """Archive the specified user's home directory."""
+def archive_list(options, log):
+    """Archive the specified mailing list's directory."""
 
-    home = os.path.expanduser("~{}".format(options.user))
-    tar_command = ["tar", "czpvf", "{}.tar.gz".format(options.user), home]
+    if options.archives_path is None:
+        # default list path if not specified otherwise
+        list_path = os.path.join("/var/lib/mailman/archives/private",
+                                 options.listname)
+    else:
+        list_path = os.path.join(options.archives_path, options.listname)
+
+    tar_command = ["tar", "czpvf", "{}.tar.gz".format(options.listname),
+                   list_path]
 
     try:
         if options.dry_run is True:
             log.info("Command to execute: {}".format(tar_command))
 
         else:
-            log.info("Starting archival of home for user {}.".format(
-                options.user))
+            log.info("Starting archival of mailing list \"{}\".".format(
+                options.listname))
             output = subprocess.check_output(tar_command,
                                              stderr=subprocess.STDOUT)
             return output
@@ -124,29 +116,21 @@ def archive_home(options, log):
         sys.exit("{} Error was: {}".format(error_message, error))
 
 
-def trash_home(options, log):
-    """Move the specified user's home directory into the trash."""
+def remove_list(options, log):
+    """Use mailman tools to remove the specified mailing list."""
 
-    if sys.platform == "darwin":
-        trash_alias = "trash"
-
-    elif sys.platform == "linux2":
-        trash_alias = "trash-put"
-
-    home = os.path.expanduser("~{}".format(options.user))
-
-    trash_command = [trash_alias, home]
+    command = ["rmlist", options.listname, "--archives"]
 
     if options.dry_run is True:
-        log.info("Command to execute: {}".format(trash_command))
+        log.info("Command to execute: {}".format(command))
 
     else:
         try:
-            subprocess.check_output(trash_command)
-            log.info("Moved home of {} to trash.".format(options.user))
+            subprocess.check_output(command)
+            log.info("Deleted list \"{}\".".format(options.listname))
         except subprocess.CalledProcessError:
-            log.error("Moving home of {} to trash failed.".format(
-                options.user))
+            log.error("Deletion of list \"{}\" failed.".format(
+                options.listname))
             sys.exit("Aborted.")
 
 
