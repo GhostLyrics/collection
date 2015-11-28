@@ -50,6 +50,18 @@ optional arguments:
                         the path to the mailman folder
 ```
 
+## boot-into-windows
+
+Automatically find a Windows based GRUB boot entry and reboot into it right now.
+
+```none
+usage: boot-into-windows.py [-h] [-v]
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -v, --verbose  print detailed information about program flow
+```
+
 ## check-raid-status
 
 Check RAID controller for health information, write to syslog. Works with controllers of type MegaRAID and 3ware. Shows progress while rebuilding.  Allows checking of multiple controllers.
