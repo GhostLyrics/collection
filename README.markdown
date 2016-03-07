@@ -131,3 +131,20 @@ optional arguments:
   --include-author      Include post or page author.
 ```
 
+## unsubscribe-me
+
+Send unsubscribe notices from specified addresses to specified targets.
+
+**You need to control your own local mailserver.**
+
+```none
+usage: unsubscribe-me.py [-h] [--dry-run] -s SENDER -r RECIPIENT
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --dry-run             Perform a dry run. Do not send out real mail.
+  -s SENDER, --sender SENDER
+                        The e-mail address you want to send from.
+  -r RECIPIENT, --recipient RECIPIENT
+                        The e-mail address you want to send to.
+```
